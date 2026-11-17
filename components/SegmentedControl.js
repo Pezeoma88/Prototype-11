@@ -1,0 +1,69 @@
+import { Pressable, Text, View } from 'react-native';
+import { colors, createThemedStyles, isHighContrast, radius, shadow, spacing } from '../theme/theme';
+
+// Pill-style segmented control, e.g. the Available Rides sort options.
+// options: [{ key, label }]. The selected segment is a raised white pill
+// whose label is drawn in `tint`.
+// accessibilityLabel is optional: when given, screen readers hear each
+// option as "<accessibilityLabel>: <option>" (e.g. "Text size: Large"),
+// so the choice makes sense without the visible heading above it.
+export default function SegmentedControl({ options, value, onChange, tint = colors.primary, style, accessibilityLabel }) {
+  return (
+    <View style={[styles.track, style]}>
+      {options.map((option) => {
+        const isActive = option.key === value;
+        return (
+          <Pressable
+            key={option.key}
+            onPress={() => onChange(option.key)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={accessibilityLabel ? `${accessibilityLabel}: ${option.label}` : undefined}
+            style={({ pressed }) => [
+              styles.segment,
+              isActive && styles.segmentActive,
+              pressed && !isActive && styles.pressed,
+            ]}
+          >
+            {/* Wraps onto a second line with large text instead of cutting off. */}
+            <Text style={[styles.text, isActive && { color: tint }]}>{option.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const styles = createThemedStyles(() => ({
+  track: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceSunken,
+    borderRadius: radius.pill,
+    padding: 3,
+  },
+  segment: {
+    flex: 1,
+    borderRadius: radius.pill,
+    paddingVertical: 7,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentActive: {
+    backgroundColor: colors.surface,
+    ...shadow.card,
+    shadowOpacity: 0.08,
+    // High Contrast: a clear outline, since a white pill on a light gray
+    // track is hard to see.
+    ...(isHighContrast() ? { borderWidth: 2, borderColor: colors.text } : null),
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  text: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+}));
